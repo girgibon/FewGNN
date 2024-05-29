@@ -12,7 +12,7 @@ from transformers import RobertaTokenizer, BartTokenizer, BertTokenizer
 
 class NLP:
     def __init__(self):
-        self.nlp = spacy.load('n_core_web_sm', disable=['ner', 'parser', 'tagger'])
+        self.nlp = spacy.load('en_core_web_sm', disable=['ner', 'parser', 'tagger'])
         self.nlp.add_pipe('sentencizer')
 
     def sent_tokenize(self, text):
