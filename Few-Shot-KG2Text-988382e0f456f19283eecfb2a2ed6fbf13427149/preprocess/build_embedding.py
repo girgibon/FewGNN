@@ -3,8 +3,8 @@ import pickle
 import numpy as np
 from transformers import BartForConditionalGeneration, BartTokenizer
 
-model = BartForConditionalGeneration.from_pretrained('facebook/bart-large')
-tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
+model = BartForConditionalGeneration.from_pretrained('facebook/bart-base')
+tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
 embedding = model.get_input_embeddings().weight
 
 vocab = pickle.load(open("node.pkl", "rb"))

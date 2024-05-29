@@ -106,8 +106,8 @@ def get_text(txt, lower=True):
 #     return node_seq
 
 
-bert_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
-bart_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
+bert_tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
+bart_tokenizer = BartTokenizer.from_pretrained('facebook/bart-base')
 # print(tokenizer.decoder_start_token_id)
 # exit(0)
 
