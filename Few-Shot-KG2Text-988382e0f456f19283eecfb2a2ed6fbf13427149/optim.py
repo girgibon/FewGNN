@@ -8,6 +8,7 @@ class TransformerSchedule(nn.Module):
     """A simple wrapper class for learning rate scheduling
     """
     def __init__(self, optimizer, init_lr, d_model, warmup_steps):
+        super().__init__()
         self.optimizer = optimizer
         self.init_lr = init_lr
         self.d_model = d_model
@@ -40,7 +41,7 @@ class TransformerSchedule(nn.Module):
             param_group['lr'] = lr
 
 
-class CosineSchedule():
+class CosineSchedule:
     r"""A simple wrapper class for learning rate scheduling
     """
 

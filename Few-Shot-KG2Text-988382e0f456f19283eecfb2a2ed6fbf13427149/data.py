@@ -26,12 +26,15 @@ class Vocab(object):
     def convert_tokens_to_ids(self, x):
         if isinstance(x, list):
             return [self.convert_tokens_to_ids(i) for i in x]
-        return self._token2idx[x]
+        elif x in self._idx2token:
+            return self._token2idx[x]
+        else:
+            return random.randint(0, len(self._idx2token) - 1)
 
 
 class NLP:
     def __init__(self):
-        self.nlp = spacy.load('../../en_core_web_sm-2.3.1', disable=['ner', 'parser', 'tagger'])
+        self.nlp = spacy.load('en_core_web_sm', disable=['ner', 'parser', 'tagger'])
         self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
 
     def sent_tokenize(self, text):

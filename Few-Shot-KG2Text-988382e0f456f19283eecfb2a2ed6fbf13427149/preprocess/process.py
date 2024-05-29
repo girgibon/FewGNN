@@ -2,13 +2,17 @@ import json
 import re
 import unidecode
 import random
+import pickle
+import torch
+import numpy as np
+from torch import nn
 import spacy
 from transformers import RobertaTokenizer, BartTokenizer, BertTokenizer
 
 
 class NLP:
     def __init__(self):
-        self.nlp = spacy.load('en_core_web_sm', disable=['ner', 'parser', 'tagger'])
+        self.nlp = spacy.load('n_core_web_sm', disable=['ner', 'parser', 'tagger'])
         self.nlp.add_pipe('sentencizer')
 
     def sent_tokenize(self, text):
@@ -27,6 +31,12 @@ class NLP:
 
 
 nlp = NLP()
+# used for RBFS
+# embed_size = 512
+# node2idx = pickle.load(open("transe_dict.pkl", "rb"))
+# node_embedding = nn.Embedding(len(node2idx), embed_size)
+# node_embedding.from_pretrained(torch.from_numpy(np.load("transe_embedding.npy")), freeze=True)
+# node_embedding_weight = node_embedding.weight
 
 
 def camel_case_split(identifier):
@@ -43,7 +53,7 @@ def camel_case_split(identifier):
 
 
 def get_nodes(n):
-    n = unidecode.unidecode(n.strip().lower())
+    n = n.strip().lower()
     n = n.replace('-', ' ')
     n = n.replace('_', ' ')
     n = nlp.word_tokenize(n)
@@ -52,7 +62,7 @@ def get_nodes(n):
 
 
 def get_relation(n):
-    n = unidecode.unidecode(n.strip().lower())
+    n = n.strip().lower()
     n = n.replace('-', ' ')
     n = n.replace('_', ' ')
     n = nlp.word_tokenize(n)
@@ -63,41 +73,37 @@ def get_relation(n):
 def get_text(txt, lower=True):
     if lower:
         txt = txt.lower()
-    txt = unidecode.unidecode(txt.strip())
+    txt = txt.strip()
     txt = txt.replace('-', ' ')
     txt = nlp.word_tokenize(txt)
 
     return txt
 
 
-def BFS(graph, s):
-    queue = [s]
-    seen = [s]
-    node_seq = []
-    while queue:
-        vertex = queue.pop(0)
-        adj_nodes = graph[vertex]
-        for w in adj_nodes:
-            if w not in seen:
-                queue.append(w)
-                seen.append(w)
-        node_seq.append(vertex)
-    return node_seq
-
-
-def DFS(graph, s):
-    stack = [s]
-    seen = [s]
-    node_seq = []
-    while stack:
-        vertex = stack.pop()
-        adj_nodes = graph[vertex]
-        for w in adj_nodes:
-            if w not in seen:
-                stack.append(w)
-                seen.append(w)
-        node_seq.append(vertex)
-    return node_seq
+# def RBFS(graph, s):
+#     queue = [s]
+#     seen = [s]
+#     node_seq = []
+#     while queue:
+#         vertex = queue.pop(0)
+#         parent_idx = node2idx[vertex]
+#         parent_emb = node_embedding_weight[parent_idx]
+#         adj_nodes = graph[vertex]
+#         adj_weight = []
+#         for w in adj_nodes:
+#             son_idx = node2idx[w]
+#             son_emb = node_embedding_weight[son_idx]
+#             adj_weight.append((w, parent_emb.dot(son_emb).item()))
+#
+#         sorted_adj_weight = sorted(adj_weight, key=lambda x: x[1], reverse=True)
+#         sorted_adj_nodes = [n for n, _ in sorted_adj_weight.items()]
+#
+#         for w in sorted_adj_nodes:
+#             if w not in seen:
+#                 queue.append(w)
+#                 seen.append(w)
+#         node_seq.append(vertex)
+#     return node_seq
 
 
 bert_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
@@ -108,12 +114,11 @@ bart_tokenizer = BartTokenizer.from_pretrained('facebook/bart-large')
 filename = ['train.json', 'valid.json', 'test.json']
 
 for fn in filename:
-    print(fn)
-    fin = open(fn, "r", encoding='utf-8')
+    fin = open(fn, "r")
     data = json.load(fin)
     fin.close()
 
-    fout = open(fn[:-5] + "_processed.json", "w", encoding='utf-8')
+    fout = open(fn[:-5] + "_processed.json", "w")
     for d in data:
         new_dict = dict()
 
@@ -217,6 +222,9 @@ for fn in filename:
         #     if case_en not in nodes:
         #         nodes.append(case_en)
 
+        # new_dict['nodes'] = RBFS(adject, nodes[0])  # provide root node
+
+        # if you do not want to use RBFS
         new_dict['nodes'] = nodes
 
         edges = [[], []]
